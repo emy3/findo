@@ -880,7 +880,6 @@ name = "findo"
 version = "1.0.0"
 dependencies = [
  "rocket 0.5.0",
- "rocket_codegen 0.5.0",
  "rocket_contrib",
  "serde",
  "serde_json",
