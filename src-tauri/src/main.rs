@@ -1,9 +1,9 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(proc_macro_hygiene, decl_macro, not(debug_assertions), windows_subsystem = "windows")]
-#[macro_use] 
 extern crate rocket;
 extern crate rocket_contrib;
-use rocket::{Rocket, Build, serde::{Deserialize, Serialize}};
+
+use rocket::{routes, Build, Request, Rocket, fairing::AdHoc};
+use rocket::serde::{Serialize, Deserialize};
 use rocket_contrib::json::Json;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -13,8 +13,7 @@ struct Todo {
     completed: bool,
 }
 
-#[get("/todos")]
-fn get_todos() -> Json<Vec<Todo>> {
+fn get_todos(_request: &Request) -> Json<Vec<Todo>> {
     Json(vec![
         Todo {
             id: 1,
@@ -30,11 +29,16 @@ fn get_todos() -> Json<Vec<Todo>> {
 }
 
 fn rocket() -> Rocket<Build> {
-    rocket::build().mount("/", routes![get_todos])
+    rocket::build()
+        .mount("/", routes![get_todos])
+        .attach(AdHoc::on_ignite("Launch Rocket", |rocket| {
+            // Additional setup on Rocket launch if needed
+            Ok(rocket)
+        }))
 }
 
 fn main() {
-    rocket().launch();
+    // Initialize and run Tauri
     tauri::Builder::default()
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
