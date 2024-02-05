@@ -2,7 +2,9 @@
 extern crate rocket;
 extern crate rocket_contrib;
 
-use rocket::{routes, Build, Request, Rocket, fairing::AdHoc};
+use rocket::http::Status;
+use rocket::response::Responder;
+use rocket::{get, routes, Build, Request, Rocket, fairing::AdHoc};
 use rocket::serde::{Serialize, Deserialize};
 use rocket_contrib::json::Json;
 
@@ -13,6 +15,7 @@ struct Todo {
     completed: bool,
 }
 
+#[get("/todos")]
 fn get_todos(_request: &Request) -> Json<Vec<Todo>> {
     Json(vec![
         Todo {
@@ -31,7 +34,7 @@ fn get_todos(_request: &Request) -> Json<Vec<Todo>> {
 fn rocket() -> Rocket<Build> {
     rocket::build()
         .mount("/", routes![get_todos])
-        .attach(AdHoc::on_ignite("Launch Rocket", |rocket| {
+        .attach(AdHoc::on_ignite("Launch Rocket", |rocket| async {
             // Additional setup on Rocket launch if needed
             Ok(rocket)
         }))
